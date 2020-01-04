@@ -1,43 +1,51 @@
-interface Subject {
-    registerObserver(o: Observer): void,
-    removeObserver(o: Observer): void,
-    notifyObservers(): void
+class Observable {
+    private observers: Array<Observer>
+    private changed: boolean = false
+
+    constructor () {
+        this.observers = []
+    }
+
+    addObserver (o: Observer): void {
+        this.observers.push(o)
+    }
+
+    deleteObserver (o: Observer): void {
+        const observableIndex = this.observers.findIndex((observable: Observer) => observable === o)
+        if (observableIndex >= 0) {
+            this.observers.splice(observableIndex, 1)
+        }
+    }
+
+    notifyObservers (data: Object | null = null): void {
+        if (this.changed) {
+            this.observers.forEach((o: Observer) => {
+                o.update(this, data)
+            })
+            this.changed = false
+        }
+    }
+
+    setChanged (): void {
+        this.changed = true
+    }
 }
 
 interface Observer {
-    update(temp: number, humidity: number, pressure: number): void
+    update (o: Observable, data: Object | null): void
 }
 
 interface DisplayElement {
     display (): void
 }
 
-class WeatherData implements Subject {
-    private observers: Array<Observer>
+class WeatherData extends Observable {
     private temperature: number
     private humidity: number
     private pressure: number
 
-    constructor () {
-        this.observers = []
-    }
-
-    registerObserver (o: Observer): void {
-        this.observers.push(o)
-    }
-    removeObserver (o: Observer): void {
-        const observableIndex = this.observers.findIndex((observable: Observer) => observable === o)
-        if (observableIndex >= 0) {
-            this.observers.splice(observableIndex, 1)
-        }
-    }
-    notifyObservers (): void {
-        this.observers.forEach((o: Observer) => {
-            o.update(this.temperature, this.humidity, this.pressure)
-        })
-    }
-
     private dataChanged (): void {
+        this.setChanged()
         this.notifyObservers()
     }
 
@@ -47,25 +55,38 @@ class WeatherData implements Subject {
         this.pressure = pressure
         this.dataChanged()
     }
+
+    public getTemperature (): number {
+        return this.temperature
+    }
+    public getHumidity (): number {
+        return this.humidity
+    }
+    public getPressure ():number {
+        return this.pressure
+    }
 }
 
 class CurrentConditionsDisplay implements Observer, DisplayElement {
     temperature: number
     humidity: number
-    weatherData: Subject
+    observable: Observable
 
-    constructor(weatherData: Subject) {
-        this.weatherData = weatherData
-        weatherData.registerObserver(this)
+    constructor(observable: Observable) {
+        this.observable = observable
+        this.observable.addObserver(this)
     }
 
-    update(temp: number, humidity: number, pressure: number): void {
-        this.temperature = temp
-        this.humidity = humidity
-        this.display()
+    update(observable: Observable, data: Object | null): void {
+        if (observable instanceof WeatherData) {
+            const weatherData = observable
+            this.temperature = weatherData.getTemperature()
+            this.humidity = weatherData.getHumidity()
+            this.display()
+        }
     }
     display(): void {
-        console.log('ConditionsDisplay', this.temperature, this.humidity)
+        console.log('ConditionsDisplay version 2', this.temperature, this.humidity)
     }
 }
 
