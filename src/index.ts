@@ -1,3 +1,5 @@
-const message:string = 'Hello world'
+import Category from './Category'
+import CategoryFactory from './CategoryFactory'
 
-console.log(message)
+const category = new Category(new CategoryFactory())
+category.loadCategory('def')
