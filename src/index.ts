@@ -1,5 +1,4 @@
-import Category from './Category'
-import CategoryFactory from './CategoryFactory'
+import RuStoreCategory from './ru/RuStoreCategory'
 
-const category = new Category(new CategoryFactory())
-category.loadCategory('def')
+const category = new RuStoreCategory()
+category.createCategory('vip')

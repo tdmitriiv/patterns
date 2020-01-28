@@ -1,18 +1,14 @@
-import CategoryFactory from './CategoryFactory'
 import { CategoryInterface } from './CategoryInteraces'
 
-class Category {
-    factory: CategoryFactory
-
-    constructor(factory: CategoryFactory) {
-        this.factory = factory
-    }
-
+abstract class Category {
     loadCategory(type: string): CategoryInterface {
-        let category = this.factory.createCategory(type)
+        let category = this.createCategory(type)
         category.loadCategoryProducts()
         return category
     }
+
+    // фабричный метод
+    abstract createCategory(type: string): CategoryInterface
 }
 
 export default Category
